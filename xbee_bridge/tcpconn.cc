@@ -97,6 +97,10 @@ TCPConn::internalThreadEntry()
 		}
 	      delete m_stream;
 	    }
+	  else
+	    {
+	      LOG(INFO) << "stream NULL";
+	    }
 	}
     }
 }
