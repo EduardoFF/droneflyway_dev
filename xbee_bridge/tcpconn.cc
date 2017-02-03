@@ -84,11 +84,11 @@ TCPConn::internalThreadEntry()
 	  if (m_stream != NULL)
 	    {
 	      ssize_t len;
-	      char line[125];
-	      while ((len = m_stream->receive(line, sizeof(line))) > 0)
+	      char line[121];
+	      while ((len = m_stream->receive(line, sizeof(line)-1)) > 0)
 		{
 		  line[len] = 0;
-		  LOG(INFO) << "TCP Received " << len;
+		  DLOG(INFO) << "TCP Received " << len;
 		  //printf("received - %s\n", line);
 		  if( m_receiveCB )
 		    {

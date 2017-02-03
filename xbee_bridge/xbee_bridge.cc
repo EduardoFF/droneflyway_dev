@@ -16,7 +16,7 @@ using namespace std;
 
 
 XbeeInterface *g_xbee;
-char g_outBuf[130];
+char g_outBuf[120];
 bool g_abort;
 
 /// Mutex used to send one packet at a time
@@ -49,12 +49,6 @@ signalHandler( int signum )
 
 void xbeeSend(uint8_t dst, size_t buflen)
 {
-  if( buflen > 100 )
-    {
-      fprintf(stderr, "ERROR: buflen: %d > 100 \n", buflen);
-      return;
-      //      exit(1)
-    }
     
   pthread_mutex_lock(&g_sendMutex);
   XbeeInterface::TxInfo txInfo;
