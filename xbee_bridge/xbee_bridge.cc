@@ -79,7 +79,7 @@ receiveData(uint16_t addr,
 	    char rssi, timespec timestamp, size_t len)
 {
   //   printf("got msg of len %u\n", len);
-    g_tcpConn->send(static_cast<const char*>(data), len);
+  g_tcpConn->send(static_cast<const char*>(data), len);
 }
  
 
@@ -176,8 +176,10 @@ int main(int argc, char **argv)
     // Publish the message.
     //    node_example->publishMessage(&pub_message);
 
+    pthread_mutex_lock(&g_sendMutex);
     if( !g_xbee->checkAlive() )
       printf("Xbee is not alive!!\n");
+    pthread_mutex_unlock(&g_sendMutex);
     sleep(5);
       
   }

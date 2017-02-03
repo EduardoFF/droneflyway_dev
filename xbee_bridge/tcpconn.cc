@@ -15,6 +15,7 @@ TCPConn::TCPConn(string  ip,
   m_ip(ip),
   m_port(port)
 {
+  m_abort = false;
   pthread_mutex_init(&m_mutex, NULL);
   initSocket();
   if( autorun )
@@ -80,26 +81,53 @@ TCPConn::internalThreadEntry()
     {
       while (!m_abort)
 	{
-	  m_stream = m_acceptor->accept();
+	  DLOG(INFO) << "calling accept";
+	  TCPStream *_stream = m_acceptor->accept();
+	  DLOG(INFO) << "accept returned";
+	  DLOG(INFO) << "trying to lock for accept";
+	  pthread_mutex_lock(&m_mutex);
+	  DLOG(INFO) << "lock for accept";
+	  m_stream = _stream;
+	  pthread_mutex_unlock(&m_mutex);
+	  DLOG(INFO) << "unlock for accept";
 	  if (m_stream != NULL)
 	    {
+	      DLOG(INFO) << "stream not null";
 	      ssize_t len;
-	      char line[121];
-	      while ((len = m_stream->receive(line, sizeof(line)-1)) > 0)
+	      char line[95];
+	      for(;;)
 		{
-		  line[len] = 0;
-		  DLOG(INFO) << "TCP Received " << len;
-		  //printf("received - %s\n", line);
-		  if( m_receiveCB )
+		  // DLOG(INFO) << "trying to lock (receive)";
+		  //pthread_mutex_lock(&m_mutex);
+		  //DLOG(INFO) << "lock receive";
+		  len = m_stream->receive(line, sizeof(line)-1);
+		  //pthread_mutex_unlock(&m_mutex);
+		  //DLOG(INFO) << "unlock receive";
+		  if(len > 0)
 		    {
-		      m_receiveCB(line,len);
+		      line[len] = 0;
+		      DLOG(INFO) << "TCP Received " << len;
+		      //printf("received - %s\n", line);
+		      if( m_receiveCB )
+			{
+			  m_receiveCB(line,len);
+			}
 		    }
+		  else if( len < 0)
+		    break;
 		}
+	      DLOG(INFO) << "receive < 0";
+	      DLOG(INFO) << "trying to lock for delete";
+	      pthread_mutex_lock(&m_mutex);
+	      DLOG(INFO) << "lock for delete";
 	      delete m_stream;
+	      m_stream = NULL;
+	      pthread_mutex_unlock(&m_mutex);
+	      DLOG(INFO) << "unlock for delete";
 	    }
 	  else
 	    {
-	      LOG(INFO) << "stream NULL";
+	      DLOG(INFO) << "stream NULL";
 	    }
 	}
     }
@@ -114,12 +142,15 @@ TCPConn::registerReceive(TCPConn::ReceiveCB cb)
 void
 TCPConn::send(const char *data, size_t len)
 {
+  DLOG(INFO) << "trying to lock (send)";
+  pthread_mutex_lock(&m_mutex);
+  DLOG(INFO) << "lock (send)";
   if( m_stream != NULL )
     {
-      pthread_mutex_lock(&m_mutex);
       m_stream->send(data, len);
-      pthread_mutex_unlock(&m_mutex);
     }
+  DLOG(INFO) << "unlock (send)";
+  pthread_mutex_unlock(&m_mutex);
 }
 
 TCPConn::~TCPConn()
