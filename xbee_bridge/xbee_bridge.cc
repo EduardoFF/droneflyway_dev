@@ -108,10 +108,6 @@ int main(int argc, char **argv)
   /// register signal
   signal(SIGINT, signalHandler);
 
-  /// Initialize Log
-  google::InitGoogleLogging(argv[0]);
-  FLAGS_logbufsecs = 0;
-  DLOG(INFO) << "Logging initialized";
 
   /// Simple Command line parser
   GetPot   cl(argc, argv);
@@ -124,6 +120,17 @@ int main(int argc, char **argv)
   const string  xbeeMode   = cl.follow("xbee1", "--mode");
   const string  ipaddr   = cl.follow("127.0.0.1", "--ip");
   const int     port  = cl.follow(12345, "--port");
+  const string  logDir  = cl.follow("/tmp/", "--logdir");
+
+  /// Initialize Log
+  google::InitGoogleLogging(argv[0]);
+  FLAGS_logbufsecs = 0;
+  FLAGS_log_dir = logDir;
+  LOG(INFO) << "Logging initialized in " << logDir;
+    
+  
+  LOG(INFO) << "Logging initialized";
+
   
   g_abort = false;
   g_nPacketsSent=0;
