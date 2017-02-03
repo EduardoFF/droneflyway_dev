@@ -48,6 +48,13 @@ signalHandler( int signum )
 
 void xbeeSend(uint8_t dst, size_t buflen)
 {
+  if( buflen > 100 )
+    {
+      fprintf(stderr, "ERROR: buflen: %d > 100 \n", buflen);
+      return;
+      //      exit(1)
+    }
+    
   pthread_mutex_lock(&g_sendMutex);
   XbeeInterface::TxInfo txInfo;
   txInfo.reqAck = true;
@@ -56,15 +63,15 @@ void xbeeSend(uint8_t dst, size_t buflen)
   int retval = g_xbee->send(dst, txInfo, g_outBuf, buflen);
   if( retval == XbeeInterface::NO_ACK )
     {
-      LOG(INFO) << "send failed NOACK";
+      DLOG(INFO) << "send failed NOACK";
     }
   else if( retval == XbeeInterface::TX_MAC_BUSY )
     {
-      LOG(INFO) << "send failed MACBUSY";
+      DLOG(INFO) << "send failed MACBUSY";
     }
   else
     {
-      LOG(INFO) << "send OK";
+      DLOG(INFO) << "send OK";
       g_nPacketsSent++;
     }
   pthread_mutex_unlock(&g_sendMutex);
@@ -76,7 +83,7 @@ receiveData(uint16_t addr,
 	    void *data,
 	    char rssi, timespec timestamp, size_t len)
 {
-    printf("got msg of len %u\n", len);
+  //   printf("got msg of len %u\n", len);
     g_tcpConn->send(static_cast<const char*>(data), len);
 }
  
@@ -84,9 +91,9 @@ receiveData(uint16_t addr,
 void
 receiveTCP(void *data, size_t len)
 {
-  LOG(INFO) << "Got TCP: len: " << len;
+  DLOG(INFO) << "Got TCP: len: " << len;
   memcpy(g_outBuf, data, len);
-  LOG(INFO) << "Forwarding to Xbee";
+  DLOG(INFO) << "Forwarding to Xbee";
   xbeeSend(1, len);
 }
 
@@ -103,7 +110,7 @@ int main(int argc, char **argv)
   /// Initialize Log
   google::InitGoogleLogging(argv[0]);
   FLAGS_logbufsecs = 0;
-  LOG(INFO) << "Logging initialized";
+  DLOG(INFO) << "Logging initialized";
 
   string  xbeeDev = argv[1];
   string  xbeeMode = "xbee1";

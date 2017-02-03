@@ -1,4 +1,5 @@
 #include "tcpconn.h"
+#include <glog/logging.h>
 #define IT(c) __typeof((c).begin())
 #define FOREACH(i,c) for(__typeof((c).begin()) i=(c).begin();i!=(c).end();++i)
 
@@ -83,11 +84,12 @@ TCPConn::internalThreadEntry()
 	  if (m_stream != NULL)
 	    {
 	      ssize_t len;
-	      char line[256];
+	      char line[125];
 	      while ((len = m_stream->receive(line, sizeof(line))) > 0)
 		{
 		  line[len] = 0;
-		  printf("received - %s\n", line);
+		  LOG(INFO) << "TCP Received " << len;
+		  //printf("received - %s\n", line);
 		  if( m_receiveCB )
 		    {
 		      m_receiveCB(line,len);

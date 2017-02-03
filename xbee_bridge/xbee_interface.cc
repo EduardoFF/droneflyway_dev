@@ -442,7 +442,7 @@ XbeeInterface::init()
     }
 #endif
 
-    mXbee->setLogLevel(100);
+    //    mXbee->setLogLevel(100);
     //mATCon = new MyConnection(this, "Local AT"); /* with a callback */
 
     mATCon = new libxbee::Con(*mXbee, "Local AT", NULL); /* without a callback */
