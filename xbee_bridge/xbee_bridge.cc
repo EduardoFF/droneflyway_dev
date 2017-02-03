@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "xbee_interface.h"
 #include <glog/logging.h>
+#include <GetPot.hpp>
 #include "tcpconn.h"
 using namespace std;
 
@@ -97,6 +98,12 @@ receiveTCP(void *data, size_t len)
   xbeeSend(1, len);
 }
 
+/// Function to print Help if need be
+void print_help(const string Application)
+{
+    exit(0);
+}
+
 /*--------------------------------------------------------------------
  * main()
  * Main function to set up ROS node.
@@ -112,10 +119,17 @@ int main(int argc, char **argv)
   FLAGS_logbufsecs = 0;
   DLOG(INFO) << "Logging initialized";
 
-  string  xbeeDev = argv[1];
-  string  xbeeMode = "xbee1";
-  int baudrate = 57600;
-  uint8_t nodeId = 0;
+  /// Simple Command line parser
+  GetPot   cl(argc, argv);
+  if(cl.search(2, "--help", "-h") ) print_help(cl[0]);
+  cl.init_multiple_occurrence();
+  cl.enable_loop();
+  const string  xbeeDev   = cl.follow("/dev/ttyUSB0", "--dev");
+  const int     baudrate  = cl.follow(57600, "--baud");
+  const uint8_t nodeId    = cl.follow(0, "--nodeid");
+  const string  xbeeMode   = cl.follow("xbee1", "--mode");
+  const string  ipaddr   = cl.follow("127.0.0.1", "--ip");
+  const int     port  = cl.follow(12345, "--port");
   
   g_abort = false;
   g_nPacketsSent=0;
@@ -150,7 +164,7 @@ int main(int argc, char **argv)
     }
   
 
-  g_tcpConn = new TCPConn("127.0.0.1", 12345, true);
+  g_tcpConn = new TCPConn(ipaddr, port, true);
   g_tcpConn->registerReceive(&receiveTCP);
 			
 
