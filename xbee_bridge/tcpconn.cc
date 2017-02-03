@@ -1,5 +1,6 @@
 #include "tcpconn.h"
 #include <glog/logging.h>
+#include <sys/time.h>
 #define IT(c) __typeof((c).begin())
 #define FOREACH(i,c) for(__typeof((c).begin()) i=(c).begin();i!=(c).end();++i)
 
