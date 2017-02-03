@@ -28,7 +28,6 @@
 #include <strings.h>
 #include <set>
 #include <string>
-#include <libgpsmm.h>
 #include <cmath>
 #include <sstream>
 #include <fstream>
