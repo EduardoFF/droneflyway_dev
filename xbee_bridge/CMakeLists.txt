@@ -49,5 +49,8 @@ target_link_libraries(xbee_bridge
   xbee.a
   )
 
-
-
+install(TARGETS xbee_bridge
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
