@@ -249,14 +249,16 @@ XbeeInterface::send(uint16_t addr, TxInfo &txPar, const void *data, size_t size)
 	    settings.disableAck = 0;
 	    con->setSettings(&settings);
 	  }
-      } else {
-      if( !settings.disableAck )
-	{
-	  restore_settings = true;
-	  settings.disableAck = 1;
-	  con->setSettings(&settings);
-	}
-    }
+      }
+    else
+      {
+	if( !settings.disableAck )
+	  {
+	    restore_settings = true;
+	    settings.disableAck = 1;
+	    con->setSettings(&settings);
+	  }
+      }
 
     debug("Trying to transmit data packet to %d of size %ld",
 	  addr, size);
@@ -285,10 +287,15 @@ XbeeInterface::send(uint16_t addr, TxInfo &txPar, const void *data, size_t size)
       }
     catch (xbee_err ret)
       {
-	log_err("xbee exception %d", ret);
+	log_err("xbee exception (%d) %s", ret, xbee_errorToStr(ret));
 	xbee_error = true;
       }
-    catch (...)
+    catch ( libxbee::xbee_etx etx )
+      {
+	log_err("xbee etx exception (%d) %s %d",etx.ret, xbee_errorToStr( etx.ret), etx.retVal);
+	xbee_error = true;	
+      }
+    catch ( ...)
       {
 	log_err("xbee exception ");
 	xbee_error = true;

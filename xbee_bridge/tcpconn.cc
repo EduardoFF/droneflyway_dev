@@ -114,10 +114,10 @@ TCPConn::internalThreadEntry()
 			  m_receiveCB(line,len);
 			}
 		    }
-		  else if( len < 0)
+		  else if( len <= 0)
 		    break;
 		}
-	      DLOG(INFO) << "receive < 0";
+	      DLOG(INFO) << "receive <= 0";
 	      DLOG(INFO) << "trying to lock for delete";
 	      pthread_mutex_lock(&m_mutex);
 	      DLOG(INFO) << "lock for delete";
